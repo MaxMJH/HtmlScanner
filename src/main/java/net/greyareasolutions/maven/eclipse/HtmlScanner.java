@@ -31,7 +31,7 @@ import java.net.http.HttpClient.Version;
  *
  */
 
-public class HTMLScanner {
+public class HtmlScanner {
 	private URI uri;
 	private HashMap<String, String> headers;
 	private Duration timeout;
@@ -40,7 +40,7 @@ public class HTMLScanner {
 	private HttpRequest request;
 	private HttpResponse<String> response;
 	
-	public HTMLScanner(String uri) {
+	public HtmlScanner(String uri) {
 		try {
 			this.uri = new URI(uri);
 		} catch (URISyntaxException e) {
@@ -150,6 +150,55 @@ public class HTMLScanner {
 			System.out.println("ERROR:\n" + e.getMessage() + " returned!" + "\nEXCEPTION:\n" + e.toString());
 			return null;
 		}
+	}
+	
+	/*---- Getters and Setters ----*/
+	public URI getURI() {
+		return this.uri;
+	}
+	
+	public void setURI(URI uri) {
+		this.uri = uri;
+	}
+	
+	public HashMap<String, String> getHeaders() {
+		return this.headers;
+	}
+	
+	public void setHeaders(HashMap<String, String> headers) {
+		this.headers = headers;
+	}
+	
+	public Duration getTimeout() {
+		return this.timeout;
+	}
+	
+	public void setTimeout(Duration timeout) {
+		this.timeout = timeout;
+	}
+	
+	public HttpCookie getCookie() {
+		return this.cookie;
+	}
+	
+	public void setCookie(HttpCookie cookie) {
+		this.cookie = cookie;
+	}
+	
+	public HttpClient getClient() {
+		return this.client;
+	}
+	
+	public void setClient(HttpClient client) {
+		this.client = client;
+	}
+	
+	public HttpRequest getRequest() {
+		return this.request;
+	}
+	
+	public void setRequest(HttpRequest request) {
+		this.request = request;
 	}
 	
 	public HttpResponse<String> getResponse() throws NullPointerException {

@@ -53,10 +53,7 @@ public class HtmlScanner {
 		}
 		this.headers = headers;
 		this.timeout = timeout;
-		this.cookie = this.generateCookie(cookie);
-		this.client = this.generateClient(this.uri, this.cookie);
-		this.request = this.generateRequest();
-		this.response = this.generateResponse();
+		this.constructHtml(cookie);
 	}
 	
 	public HtmlScanner(String uri, String cookie, HashMap<String, String> headers) {
@@ -72,6 +69,13 @@ public class HtmlScanner {
 	}
 	
 	/*---- Methods ----*/
+	public void constructHtml(String cookie) {
+		this.cookie = this.generateCookie(cookie);
+		this.client = this.generateClient(this.uri, this.cookie);
+		this.request = this.generateRequest();
+		this.response = this.generateResponse();
+	}
+	
 	private HttpCookie generateCookie(String cookie) {
 		// Check to see if cookie string is in correct format (cookieName=cookieValue).
 		if (Pattern.matches(".*=.*", cookie)) {

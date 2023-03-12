@@ -32,6 +32,7 @@ import java.net.http.HttpClient.Version;
  */
 
 public class HtmlScanner {
+	/*---- Fields ----*/
 	private URI uri;
 	private HashMap<String, String> headers;
 	private Duration timeout;
@@ -40,7 +41,8 @@ public class HtmlScanner {
 	private HttpRequest request;
 	private HttpResponse<String> response;
 	
-	public HtmlScanner(String uri) {
+	/*---- Constructors ----*/
+	public HtmlScanner(String uri, String cookie, HashMap<String, String> headers, Duration timeout) {
 		try {
 			this.uri = new URI(uri);
 		} catch (URISyntaxException e) {
@@ -49,14 +51,27 @@ public class HtmlScanner {
 			// Set to null otherwise.
 			this.uri = null;
 		}
-		this.headers = new HashMap<>();
-		this.timeout = Duration.ofSeconds(30);
-		this.cookie = this.generateCookie("");
+		this.headers = headers;
+		this.timeout = timeout;
+		this.cookie = this.generateCookie(cookie);
 		this.client = this.generateClient(this.uri, this.cookie);
 		this.request = this.generateRequest();
 		this.response = this.generateResponse();
 	}
 	
+	public HtmlScanner(String uri, String cookie, HashMap<String, String> headers) {
+		this(uri, cookie, headers, Duration.ofSeconds(30));
+	}
+	
+	public HtmlScanner(String uri, String cookie) {
+		this(uri, cookie, new HashMap<>(), Duration.ofSeconds(30));
+	}
+	
+	public HtmlScanner(String uri) {
+		this(uri, "", new HashMap<>(), Duration.ofSeconds(30));
+	}
+	
+	/*---- Methods ----*/
 	private HttpCookie generateCookie(String cookie) {
 		// Check to see if cookie string is in correct format (cookieName=cookieValue).
 		if (Pattern.matches(".*=.*", cookie)) {

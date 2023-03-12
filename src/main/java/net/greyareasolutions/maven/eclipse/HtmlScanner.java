@@ -17,18 +17,30 @@ import java.util.regex.Pattern;
 import java.net.http.HttpClient.Version;
 
 /**
- * Need to get URI String - MUST.
- * Need to get headers - OPTIONAL.
- * Need to get HTTP Version - OPTIONAL.
- * Need to get Timeout duration - OPTIONAL.
- * Need to get Cookie - OPTIONAL.
+ * The class HtmlScanner is used to create a connection to a specified URI.
+ * Headers, Timeout Duration, and Cookies can be supplied in order to create
+ * a specific connection to obtain the HTML page's content. 
  * 
- * Need to make a HttpClient.
- * Need to make a HttpRequest.
- * Need to make a HttpResponse.
- * 
- * @author Max
+ * An example of the class's usage can be seen below:
+ * <pre>
+ * HtmlScanner htmlScanner = new HtmlScanner("http(s)://www.example.com");
+ * String html = htmlScanner.getResponse().body();
+ * </pre>
  *
+ * If it is required for a URI to be changed, or an extra header needs to be added,
+ * it is crucial that the HTML is re-constructed, an example of this can be seen below:
+ * <pre>
+ * HashMap<String, String> headers = new HashMap<>();
+ * headers.put("Connection", "keep-alive");
+ * ...
+ * 
+ * htmlScanner.setHeaders(headers);
+ * <b>htmlScanner.constructHtml();</b>
+ * ...
+ * </pre>
+ * @author Max Harris - mjh@greyareasolutions.net
+ * @version v0.0.1
+ * @since 12-03-2023
  */
 
 public class HtmlScanner {
@@ -71,6 +83,13 @@ public class HtmlScanner {
 	/*---- Methods ----*/
 	public void constructHtml(String cookie) {
 		this.cookie = this.generateCookie(cookie);
+		this.client = this.generateClient(this.uri, this.cookie);
+		this.request = this.generateRequest();
+		this.response = this.generateResponse();
+	}
+	
+	public void constructHtml() {
+		this.cookie = this.generateCookie("");
 		this.client = this.generateClient(this.uri, this.cookie);
 		this.request = this.generateRequest();
 		this.response = this.generateResponse();

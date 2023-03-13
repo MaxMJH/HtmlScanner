@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"net.greyareasolutions.maven.eclipse","l":"HtmlScanner"}];updateSearchResults();
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"net.greyareasolutions.maven.eclipse","l":"HtmlScanner"},{"p":"net.greyareasolutions.maven.eclipse","l":"HttpOptions"}];updateSearchResults();

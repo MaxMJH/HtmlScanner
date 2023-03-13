@@ -5,14 +5,11 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.net.http.HttpClient.Version;
 
@@ -23,16 +20,17 @@ import java.net.http.HttpClient.Version;
  * 
  * An example of the class's usage can be seen below:
  * <pre>
- * HtmlScanner htmlScanner = new HtmlScanner("http(s)://www.example.com");
+ * HttpOptions options = new HttpOptions("https://www.google.com");
+ * HtmlScanner htmlScanner = new HtmlScanner(options);
  * String html = htmlScanner.getResponse().body();
  * </pre>
- * If it is required for a URI to be changed, or an extra header needs to be added,
+ * If it is required for a URI to be changed, or an extra header needs to be added, etc...
  * it is crucial that the HTML is re-constructed, an example of this can be seen below:
  * <pre>
  * HashMap&lt;String, String&gt; headers = new HashMap&lt;&gt;();
  * headers.put("Connection", "keep-alive");
  * ...
- * htmlScanner.setHeaders(headers);
+ * options.setHeaders(headers);
  * <b>htmlScanner.constructHtml();</b>
  * ...
  * </pre>
@@ -43,19 +41,9 @@ import java.net.http.HttpClient.Version;
 public class HtmlScanner {
 	/*---- Fields ----*/
 	/**
-	 * Field which stores the target URI.
+	 * Fields which stores the options that need to be sent with the request.
 	 */
-	private URI uri;
-	
-	/**
-	 * Field which stores the target headers.
-	 */
-	private HashMap<String, String> headers;
-	
-	/**
-	 * Field which stores the target request timeout.
-	 */
-	private Duration timeout;
+	private HttpOptions options;
 	
 	/**
 	 * Field which stores the target cookie.
@@ -80,94 +68,27 @@ public class HtmlScanner {
 	/*---- Constructors ----*/
 	/**
 	 * Core constructor that aims to initialise all declared fields of the class. 
-	 * If the specified URI is not in the correct format, the URI will be set to null,
-	 * which will later throw a null pointer exception, therefore take into consideration
-	 * the validity of the input URI.
 	 * 
-	 * Constructor also calls the {@link #constructHtml(String cookie)} method to initialise
+	 * Constructor also calls the {@link #constructHtml()} method to initialise
 	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/net/HttpCookie.html" title="class or interface in java.net" class="external-link">HttpCookie</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html" title="class or interface in java.net.http" class="external-link">HttpClient</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpRequest.html" title="class or interface in java.net.http" class="external-link">HttpRequest</a>, and <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpResponse.html" title="class or interface in java.net.http" class="external-link">HttpResponse</a>.
 	 * 
-	 * @param uri URI of the target.
-	 * @param cookie sets the relevant cookie needed if authentication is present.
-	 * @param headers sets the relevant headers required by the target (if any).
-	 * @param timeout sets the lifetime of the request, best to leave it null unless required.
+	 * @param options reference of {@link HttpOptions}.
 	 */
-	public HtmlScanner(String uri, String cookie, HashMap<String, String> headers, Duration timeout) {
-		// Attempt to parse the URI.
-		try {
-			this.uri = new URI(uri);
-		} catch (URISyntaxException e) {
-			System.out.println("AN ERROR HAS OCCURED!\n" + e.getMessage() + "\nCAUSED BY: " + e.getReason());
-			
-			// Set to null otherwise.
-			this.uri = null;
-		}
-		
-		// Initialise remaining fields.
-		this.headers = headers;
-		this.timeout = timeout;
+	public HtmlScanner(HttpOptions options) {
+		// Initialise the options field.
+		this.options = options;
 		
 		// As a user can re-construct the HTTP objects, this is decoupled into a separate function.
-		this.constructHtml(cookie);
-	}
-	
-	/**
-	 * Constructor which sets a default duration of 30 seconds. This constructor passes the remaining parameters
-	 * to the top-level constructor.
-	 * 
-	 * @param uri URI of the target.
-	 * @param cookie sets the relevant cookie needed if authentication is present.
-	 * @param headers sets the relevant headers required by the target (if any).
-	 */
-	public HtmlScanner(String uri, String cookie, HashMap<String, String> headers) {
-		// Call the top-level constructor, setting a default timeout.
-		this(uri, cookie, headers, Duration.ofSeconds(30));
-	}
-	
-	/**
-	 * Constructor which sets a default duration of 30 seconds, as well as an empty HashMap for headers. This constructor passes the remaining
-	 * parameters to the top-level constructor.
-	 * 
-	 * @param uri URI of the target.
-	 * @param cookie sets the relevant cookie needed if authentication is present.
-	 */
-	public HtmlScanner(String uri, String cookie) {
-		// Call the top-level constructor, setting a default timeout and an empty HashMap for headers.
-		this(uri, cookie, new HashMap<>(), Duration.ofSeconds(30));
-	}
-	
-	/**
-	 * Constructor which sets a default duration of 30 seconds, an empty HashMap for headers, as well as an empty cookie. 
-	 * This constructor passes the remaining parameters to the top-level constructor.
-	 * 
-	 * @param uri URI of the target.
-	 */
-	public HtmlScanner(String uri) {
-		// Call the top-level constructor, setting a default timeout, an empty HashMap for headers, and an empty cookie.
-		this(uri, "", new HashMap<>(), Duration.ofSeconds(30));
+		this.constructHtml();
 	}
 	
 	/*---- Methods ----*/
 	/**
 	 * This method aims to initialise the relevant HTTP objects so that a HTTP request can be sent to the target.
-	 * This method also allows for a cookie to be passed.
-	 * 
-	 * @param cookie sets the relevant cookie needed if authentication is present.
-	 */
-	public void constructHtml(String cookie) {
-		// Initialise relevant HTTP objects, as well as set a cookie.
-		this.cookie = this.generateCookie(cookie);
-		this.client = this.generateClient(this.uri, this.cookie);
-		this.request = this.generateRequest();
-		this.response = this.generateResponse();
-	}
-	
-	/**
-	 * This method aims to initialise the relevant HTTP objects so that a HTTP request can be sent to the target.
 	 */
 	public void constructHtml() {
-		this.cookie = this.generateCookie("");
-		this.client = this.generateClient(this.uri, this.cookie);
+		this.cookie = this.generateCookie(this.options.getCookie());
+		this.client = this.generateClient(this.options.getURI(), this.cookie);
 		this.request = this.generateRequest();
 		this.response = this.generateResponse();
 	}
@@ -245,18 +166,18 @@ public class HtmlScanner {
 		Builder httpRequest = HttpRequest.newBuilder();
 		
 		// Set request URI.
-		httpRequest.uri(this.uri);
+		httpRequest.uri(this.options.getURI());
 		
-		if (this.uri == null) {
+		if (this.options.getURI() == null) {
 			return httpRequest.build();
 		}
 		
 		// Check to see if any headers have been specified.
-		if (headers.size() > 0 && headers != null) {
+		if (this.options.getHeaders().size() > 0 && this.options.getHeaders() != null) {
 			// Iterate through each header and add it to the request.
-			for (int i = 0; i < headers.size(); i++) {
-				String key = (String) headers.keySet().toArray()[i];
-				String value = headers.get(key);
+			for (int i = 0; i < this.options.getHeaders().size(); i++) {
+				String key = (String) this.options.getHeaders().keySet().toArray()[i];
+				String value = this.options.getHeaders().get(key);
 				
 				// Add header to request.
 				httpRequest.setHeader(key, value);
@@ -267,12 +188,12 @@ public class HtmlScanner {
 		httpRequest.GET();
 		
 		// Check to see if specified duration is 0, less, or null.
-		if (this.timeout.isNegative() || this.timeout.isZero() || this.timeout == null) {
+		if (this.options.getTimeout().isNegative() || this.options.getTimeout().isZero() || this.options.getTimeout() == null) {
 			// Set timeout to default.
-			httpRequest.timeout(this.timeout);
+			httpRequest.timeout(this.options.getTimeout());
 		} else {
 			// Set timeout to specified amount.
-			httpRequest.timeout(this.timeout);
+			httpRequest.timeout(this.options.getTimeout());
 		}
 		
 		// Build and return the request.
@@ -297,57 +218,21 @@ public class HtmlScanner {
 	
 	/*---- Getters and Setters ----*/
 	/**
-	 * Returns the class's initialised uri field.
+	 * Returns the class's initialised options field.
 	 * 
-	 * @return the class's uri field.
+	 * @return the class's options field.
 	 */
-	public URI getURI() {
-		return this.uri;
+	public HttpOptions getOptions() {
+		return this.options;
 	}
 	
 	/**
-	 * Sets the class's uri field.
+	 * Sets the class's options field.
 	 * 
-	 * @param uri uri of the target.
+	 * @param options options that will be attached when sending the request to the target URI.
 	 */
-	public void setURI(URI uri) {
-		this.uri = uri;
-	}
-	
-	/**
-	 * Returns the class's initialised headers field.
-	 * 
-	 * @return the class's headers field.
-	 */
-	public HashMap<String, String> getHeaders() {
-		return this.headers;
-	}
-	
-	/**
-	 * Sets the class's headers field.
-	 * 
-	 * @param headers headers to be sent with the request.
-	 */
-	public void setHeaders(HashMap<String, String> headers) {
-		this.headers = headers;
-	}
-	
-	/**
-	 * Returns the class's initialised timeout field.
-	 * 
-	 * @return the class's timeout field.
-	 */
-	public Duration getTimeout() {
-		return this.timeout;
-	}
-	
-	/**
-	 * Sets the class's timeout field.
-	 * 
-	 * @param timeout timeout which will be attached to the request.
-	 */
-	public void setTimeout(Duration timeout) {
-		this.timeout = timeout;
+	public void setOptions(HttpOptions options) {
+		this.options = options;
 	}
 	
 	/**

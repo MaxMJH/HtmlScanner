@@ -15,8 +15,9 @@ import java.net.http.HttpClient.Version;
 
 /**
  * The class HtmlScanner is used to create a connection to a specified URI.
- * Headers, Timeout Duration, and Cookies can be supplied in order to create
- * a specific connection to obtain the HTML page's content. 
+ * Headers, Timeout Duration, and Cookies can be supplied via
+ * {@link HttpOptions} in order to create a specific connection to obtain 
+ * the HTML page's content. 
  * 
  * An example of the class's usage can be seen below:
  * <pre>
@@ -65,7 +66,7 @@ public class HtmlScanner {
 	 */
 	private HttpResponse<String> response;
 	
-	/*---- Constructors ----*/
+	/*---- Constructor ----*/
 	/**
 	 * Core constructor that aims to initialise all declared fields of the class. 
 	 * 

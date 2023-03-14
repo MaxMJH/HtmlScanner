@@ -3,6 +3,7 @@ package net.greyareasolutions.maven.eclipse;
 import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The class HttpOptions is used to store general information used when sending a request.
@@ -30,7 +31,7 @@ public class HttpOptions {
 	/**
 	 * Field which stores the target headers.
 	 */
-	private HashMap<String, String> headers;
+	private Map<String, String> headers;
 	
 	/**
 	 * Field which stores the target request timeout.
@@ -48,7 +49,7 @@ public class HttpOptions {
 	 * @param headers sets the relevant headers required by the target (if any).
 	 * @param timeout sets the lifetime of the request, best to leave it null unless required. 
 	 */
-	public HttpOptions(URI uri, String cookie, HashMap<String, String> headers, Duration timeout) {
+	public HttpOptions(URI uri, String cookie, Map<String, String> headers, Duration timeout) {
 		// Initialise the class's fields.
 		this.uri = uri;
 		this.cookie = cookie;
@@ -118,7 +119,7 @@ public class HttpOptions {
 	 * 
 	 * @return the class's headers field.
 	 */
-	public HashMap<String, String> getHeaders() {
+	public Map<String, String> getHeaders() {
 		return this.headers;
 	}
 	

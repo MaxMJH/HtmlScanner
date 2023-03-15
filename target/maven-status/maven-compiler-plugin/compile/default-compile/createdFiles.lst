@@ -1,0 +1,6 @@
+net\greyareasolutions\maven\eclipse\HtmlScanner.class
+net\greyareasolutions\maven\eclipse\UserAgents.class
+net\greyareasolutions\maven\eclipse\MultiHtmlScanner.class
+net\greyareasolutions\maven\eclipse\MultiHtmlScanner$MultiHtmlScannerRunnable.class
+net\greyareasolutions\maven\eclipse\HtmlScannerMain.class
+net\greyareasolutions\maven\eclipse\HttpOptions.class

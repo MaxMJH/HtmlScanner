@@ -4,7 +4,6 @@
 .settings/
 
 # Compiled Java classes
-target/
 bin/
 
 # Eclipse log files and temporary files

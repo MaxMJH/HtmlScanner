@@ -95,6 +95,35 @@ public class HttpOptions {
 		this(uri, "", new HashMap<>(), Duration.ofSeconds(30));
 	}
 	
+	/**
+	 * Constructor which sets a default value of all class's fields. This constructor passes the
+	 * remaining parameters to the top-level constructor. If this constructor is used, it is 
+	 * expected that the setters are used.
+	 */
+	public HttpOptions() {
+		// Call the top-level constructor, setting a null URI, a default timeout, an empty HashMap for headers, and an empty cookie.
+		this(null, "", new HashMap<>(), Duration.ofSeconds(30));
+	}
+	/*---- Methods ----*/
+	/**
+	 * This method adds a single header to the class's headers field.
+	 * 
+	 * @param headerName name of the header.
+	 * @param headerValue value of the header.
+	 */
+	public void addHeader(String headerName, String headerValue) {
+		this.headers.put(headerName, headerValue);
+	}
+	
+	/**
+	 * This method attempts to remove a header from the class's headers field.
+	 * 
+	 * @param headerName name of the header to remove.
+	 */
+	public void removeHeader(String headerName) {
+		this.headers.remove(headerName);
+	}
+	
 	/*---- Getters and Setters ----*/
 	/**
 	 * Returns the class's initialised uri field.

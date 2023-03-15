@@ -300,7 +300,7 @@ public class HtmlScannerMain {
 		    		Document html = Jsoup.parse(responses.get(currentURI));
 		    		
 		    		// Print the current URI.
-		    		System.out.println(responses.keySet().toArray()[j] + ":");		    		
+		    		System.out.println("\u001B[46m\u001B[37m" + responses.keySet().toArray()[j] + ":\u001B[0m");		    		
 			
 		    		// Print the response, depending on flags used (comments and / or hidden attributes).
 		    		checkJSoupFlags(searchComments, searchHidden, html);
@@ -313,7 +313,7 @@ public class HtmlScannerMain {
 				HttpResponse<String> response = htmlScanner.getResponse();
 				
 				// Print the current URI.
-				System.out.println(response.uri() + ":");
+				System.out.println("\u001B[46m\u001B[37m" + response.uri() + ":\u001B[0m");
 				
 				// Parse the response of HTTP request.
 				Document html = Jsoup.parse(response.body());
@@ -382,10 +382,11 @@ public class HtmlScannerMain {
 				// Check to see if the child node is a comment.
 				if (child.nodeName().equals("#comment")) {
 					// Print the comment.
-					System.out.println(((Comment) child).getData());
+					System.out.println("\t\u001B[32m<!--" + ((Comment) child).getData().strip() + "-->\u001B[0m");
 				}
 			}
 		}
+		System.out.println();
     }
     
     /**
@@ -395,13 +396,14 @@ public class HtmlScannerMain {
      * @param html value of HTTP request's response.
      */
     private static void getHiddenInputs(Document html) {
-    	// Get all elements of the HTTP request's repsonse that have a hidden attribute.
+    	// Get all elements of the HTTP request's response that have a hidden attribute.
     	Elements hiddenInputs = html.select("[type=hidden]");
     	
     	// Iterate through each element.
     	for (Element hiddenInput : hiddenInputs) {
     		// Print the entire hidden comment.
-    		System.out.println(hiddenInput);
+    		System.out.println("\t\u001B[34m" + hiddenInput + "\u001B[0m");
     	}
+    	System.out.println();
     }
 }

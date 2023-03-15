@@ -196,7 +196,7 @@ public class HtmlScannerMain {
         			    			// Check to see if headers are in form x=y;a=b...
         			    			if (Pattern.matches(".*=.*", currentLine)) {
         			    				// Split the individual header into name and value.
-            							String[] header = args[i + 1].split("=");
+            							String[] header = currentLine.split("=");
             							
             							// Add the header in form HeaderName: HeaderValue.
             							httpOptions.addHeader(header[0], header[1]);

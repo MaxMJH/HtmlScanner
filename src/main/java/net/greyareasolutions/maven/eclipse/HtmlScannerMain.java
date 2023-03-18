@@ -47,9 +47,10 @@ public class HtmlScannerMain {
     public static void main(String[] args) {
     	// Check to see if there are any arguments passed.
     	if (args.length > 1) {
-    		// Booleans used to see if main flags are used (comments and hidden attributes).
+    		// Booleans used to see if main flags are used (comments, hidden attributes, and meta elements).
     		boolean searchComments = false;
     		boolean searchHidden = false;
+    		boolean searchMeta = false;
     		
     		// List of registered flags, any others supplied are incorrect.
     		List<String> flags = new ArrayList<>(Stream.of("-uri", "-subUris", "-cookie", "-header", "-headers", "-timeout", "-c", "-hi", "-o").toList());
@@ -254,6 +255,11 @@ public class HtmlScannerMain {
     					// If flag is present in arguments, set a flag.
     					searchHidden = true;
     					break;
+    				// -m flag.
+    				case "-m":
+    					// If flag is present in arguments, set a flag.
+    					searchMeta = true;
+    					break;
     				// -random-agent flag.
     				case "-random-agent":
     					// Create an instance of random.
@@ -303,7 +309,7 @@ public class HtmlScannerMain {
 		    		System.out.println("\u001B[46m\u001B[37m" + responses.keySet().toArray()[j] + ":\u001B[0m");		    		
 			
 		    		// Print the response, depending on flags used (comments and / or hidden attributes).
-		    		checkJSoupFlags(searchComments, searchHidden, html);
+		    		checkJSoupFlags(searchComments, searchHidden, searchMeta, html);
 		    	}
 			} else {
 				// Create a HtmlScanner with generated options.
@@ -319,7 +325,7 @@ public class HtmlScannerMain {
 				Document html = Jsoup.parse(response.body());
 	    		
 				// Print response, depending on flags used (comments and / or hidden attributes).
-				checkJSoupFlags(searchComments, searchHidden, html);
+				checkJSoupFlags(searchComments, searchHidden, searchMeta, html);
 			}
     	} else {
     		// Print an example usage of the program.
@@ -332,10 +338,11 @@ public class HtmlScannerMain {
     		System.out.println("\t-timeout: The timout for the connection in seconds, if any. Must be in the form 0-9s.");
     		System.out.println("\t-c: Used to find all comments in each HTTP request's response.");
     		System.out.println("\t-hi: Used to find all hidden attributes in each HTTP request's response.");
+    		System.out.println("\t-m: Used to find all meta elements in each HTTP request's response.");
     		System.out.println("\t-random-agent: Used to generate a random user-agent for each request, if needed.");
     		System.out.println("\nTo use this script, simply specify the appropriate flags on the command line.");
     		System.out.println("Example Usage:");
-    		System.out.println("\tjava HtmlScannerMain -uri http://www.example.com -cookie PHPSESSID=sessID;... -header test=header;another=header;... -timeout 40s -c -hi -random-agent");
+    		System.out.println("\tjava HtmlScannerMain -uri http://www.example.com -cookie PHPSESSID=sessID;... -header test=header;another=header;... -timeout 40s -c -hi -m -random-agent");
     	}
     }
     
@@ -345,24 +352,41 @@ public class HtmlScannerMain {
      * 
      * @param searchComments flag insinuating the usage of -c flag.
      * @param searchHidden flag insinuating the usage of -hi flag.
+     * @param searchMeta flag insinuating the usage of -m flag.
      * @param html value of HTTP request's response. 
      */
-    private static void checkJSoupFlags(boolean searchComments, boolean searchHidden, Document html) {
+    private static void checkJSoupFlags(boolean searchComments, boolean searchHidden, boolean searchMeta, Document html) {    	
     	// Check to see which flags have been set.
-    	if (searchComments && searchHidden) {
+    	if (searchComments && searchHidden && searchMeta) {
+    		// All flags have been set, therefore get comments, hidden attributes, and meta elements from current response.
+    		getComments(html);
+    		getHiddenInputs(html);
+    		getMetas(html);
+    	} else if (searchComments && searchHidden) {
     		// Both flags have been set, therefore get comments and hidden attributes from current response.
-			getComments(html);
-			getHiddenInputs(html);
-		} else if (searchComments) {
-			// Only -c flag has been set, therefore get comments from current response.
-			getComments(html);
-		} else if (searchHidden) {
-			// Only -hi flag has been set, therefore get comments from current response.
-			getHiddenInputs(html);
-		} else {
-			// Notify that the URI does not contain comments or hidden attributes.
-			System.out.println("This URI does not contain any comments or hidden attributes!");
-		}
+    		getComments(html);
+    		getHiddenInputs(html);
+    	} else if (searchComments && searchMeta) {
+    		// Both flags have been set, therefore get comments and meta elements from current response.
+    		getComments(html);
+    		getMetas(html);
+    	} else if (searchHidden && searchMeta) {
+    		// Both flags have been set, therefore get hidden attributes and meta elements from current response.
+    		getHiddenInputs(html);
+    		getMetas(html);
+    	} else if (searchComments) {
+    		// Only -c flag has been set, therefore get comments from current response.
+    		getComments(html);
+    	} else if (searchHidden) {
+    		// Only -hi flag has been set, therefore get hidden inputs from current response.
+    		getHiddenInputs(html);
+    	} else if (searchMeta) {
+    		// Only -m flag has been set, therefore get meta elements from current response.
+    		getMetas(html);
+    	} else {
+    		// Notify that the URI does not contain comments or hidden attributes.
+    		System.out.println("This URI does not contain any comments, hidden attributes, or meta elements!");
+    	}
     }
     
     /**
@@ -403,6 +427,24 @@ public class HtmlScannerMain {
     	for (Element hiddenInput : hiddenInputs) {
     		// Print the entire hidden comment.
     		System.out.println("\t\u001B[34m" + hiddenInput + "\u001B[0m");
+    	}
+    	System.out.println();
+    }
+    
+    /**
+     * This method attempts to find the meta elements in the
+     * specified HTTP request's response
+     * 
+     * @param html value of HTTP request's response.
+     */
+    private static void getMetas(Document html) {
+    	// Get all elements of the HTTP request's response that are meta elements.
+    	Elements metaElements = html.select("meta");
+    	
+    	// Iterate through each element.
+    	for (Element metaElement : metaElements) {
+    		// Print the entire meta element.
+    		System.out.println("\t\u001B[31m" + metaElement + "\u001B[0m");
     	}
     	System.out.println();
     }
